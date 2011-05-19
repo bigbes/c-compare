@@ -384,7 +384,7 @@ class CGenerator(object):
 def translate_to_c(ast):
 #    ast = parse_file(filename, use_cpp=True)
     generator = CGenerator()
-    print(generator.visit(ast))
+    return generator.visit(ast)
 
 #------------------------------------------------------------------------------
 if __name__ == "__main__":

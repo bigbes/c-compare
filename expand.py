@@ -40,7 +40,8 @@ def expand_decl(decl, type_arr):
             return [decl.name, nested]
         elif typ == FuncDecl:
             if decl.args:
-                params = [expand_decl(param, type_arr) for param in decl.args.params]
+                params = [expand_decl(param, type_arr) for param in\
+				decl.args.params]
             else:
                 params = []
             return [params, nested]
@@ -60,3 +61,8 @@ def expand_init(init):
             return ['ID', init.name]
     else:
         return
+
+#------------------------------------------------------------------------------
+
+if __name__ == "__main__":
+	pass

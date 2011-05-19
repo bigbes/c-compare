@@ -13,7 +13,8 @@ def init_ID(self, name, coord=None, id=None):
     self.coord = coord
     self.id = id
 
-def init_Decl(self, name, quals, storage, funcspec, type, init, bitsize, coord=None, id=None):
+def init_Decl(self, name, quals, storage, funcspec, type, init, bitsize,\
+		coord=None, id=None):
     self.name = name
     self.quals = quals
     self.storage = storage
@@ -23,3 +24,8 @@ def init_Decl(self, name, quals, storage, funcspec, type, init, bitsize, coord=N
     self.bitsize = bitsize
     self.coord = coord
     self.id = id
+
+#------------------------------------------------------------------------------
+
+if __name__ == "__main__":
+	pass

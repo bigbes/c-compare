@@ -18,7 +18,7 @@ class func_count:
         self.count += 1
         return self.count
 
-arr_arr = {}
+#arr_arr = {}
 varr_arr = {}
 fc_var = func_count()
 fc_func = func_count()
@@ -132,10 +132,10 @@ def UncryptDecl(node, var_arr = None, type_arr = None, type_undone_arr = None, f
         if node.name != None:
             node.id=fc_var()
             var_arr[node.name]=[node.id, expand_decl(node, type_arr)]
-            if node.name not in arr_arr.keys():#debug
-                arr_arr[node.name] = [node.id, expand_decl(node, type_arr)]#debug
-            else:#debug
-                arr_arr[node.name] += [node.id, expand_decl(node, type_arr)]#debug
+#            if node.name not in arr_arr.keys():#debug
+#                arr_arr[node.name] = [node.id, expand_decl(node, type_arr)]#debug
+#            else:#debug
+#                arr_arr[node.name] += [node.id, expand_decl(node, type_arr)]#debug
             if node.id not in varr_arr.keys():
                 varr_arr[node.id] = [expand_decl(node, type_arr)]
             else:
@@ -190,6 +190,28 @@ def strange_check_1(a, b, hash1, hash2):
         return comp_subtrees(a, b, hash1, hash2)
     return a is None and b is None
 
+def Complain1(node, array, answer = None):
+    if answer is None:
+        answer = []
+    if node in array:
+        answer.append(node)
+        return answer
+    else:
+        for i in node.children():
+            Complain1(i, array)
+    return answer
+
+def Complain(node1, node2, array1, array2, matching):
+    h1 = Complain1(node1, array1)
+    h2 = Complain1(node2, array2)
+#    h1 = filter(lambda x: matching[x] in h2, h1)
+    filter(lambda x: matching[x] in h2, h1)
+    h2 = [matching[i] for i in h1]
+#    h3 = [lambda x: matching[x], h1 ]
+#    for i in h1:
+#            h3.append(matching[i])
+    return [h1, h2]
+            
 if __name__ == "__main__":
     if len(sys.argv) > 2:
         filename1  = sys.argv[1]
@@ -218,10 +240,29 @@ if __name__ == "__main__":
             if third != []:
                 fourth.append(copy(third))
                 third = []
+    pprint(fourth)
+    array1 = []
+    array2 = []
+    temp_dict = {}
 
-#    pprint(fourth)
     for i in fourth:
         for j in i:
-            pprint(j)
-    pprint(arr_arr)
+            array1.append(j[2])
+            array2.append(j[3])
+            temp_dict[j[2]]=j[3]
+    
+    array3 = Complain(t1, t2, array1, array2, temp_dict)
+    temp_dict.clear()
+    pprint(array3)
+    for i in array3[0]:
+        temp_dict[get_number_of_children(i)] = i
+        
+    for key in sorted(temp_dict.keys()):
+        str = translate_to_c(temp_dict[key])
+        h = str.splitlines()
+        for i in h:
+            if i != '' and i != ' ':
+                print("0> {0}".format(i))
+        print('')
+#    pprint(arr_arr)
     pprint(varr_arr)
