@@ -28,4 +28,4 @@ def init_Decl(self, name, quals, storage, funcspec, type, init, bitsize,\
 #------------------------------------------------------------------------------
 
 if __name__ == "__main__":
-	pass
+    pass

@@ -382,10 +382,15 @@ class CGenerator(object):
                                 c_ast.StructRef, c_ast.FuncCall))
 
 def translate_to_c(ast):
-#    ast = parse_file(filename, use_cpp=True)
     generator = CGenerator()
     return generator.visit(ast)
 
+def print_file(node, number):#, output=sys.stdout()):
+        str = translate_to_c(node)
+        h = str.splitlines()
+        for i in h:
+            if i != '' and i != ' ':
+                print("{1}> {0}".format(i, number))
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
     pass

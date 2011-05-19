@@ -7,7 +7,7 @@ from pprint import pprint
 from pycparser.c_ast import *
 from copy import copy
 
-from ctoc import translate_to_c
+from ctoc import translate_to_c, print_file
 from genccfg import makeinit
 from expand import expand_decl, expand_init
 
@@ -55,7 +55,7 @@ def comp_subtrees(self, other, hash1 = None, hash2 = None):
                 hash2[other.id][1] += 1
             else:
                 return False
-        #TODO Temp for typedef. Понять, как улучшить код.
+
         elif type(other) == FuncDef:
 
             temp_list1 = [self.body]
@@ -69,10 +69,10 @@ def comp_subtrees(self, other, hash1 = None, hash2 = None):
             for i in range(0, len(temp_list1)):
                 if not strange_check_1(temp_list1[i], temp_list2[i], hash1, hash2):
                     return False
-
+        #TODO сравнение того, какая функция вызывается
         elif type(other) == FuncCall:
-            pass
-        #End of TODO
+            return True
+
         else:
             tmp1 = self.children()
             tmp2 = other.children()
@@ -194,22 +194,20 @@ def Complain1(node, array, answer = None):
     if answer is None:
         answer = []
     if node in array:
+        pprint(node)
         answer.append(node)
         return answer
     else:
         for i in node.children():
-            Complain1(i, array)
+            Complain1(i, array, answer)
     return answer
 
 def Complain(node1, node2, array1, array2, matching):
     h1 = Complain1(node1, array1)
     h2 = Complain1(node2, array2)
-#    h1 = filter(lambda x: matching[x] in h2, h1)
     filter(lambda x: matching[x] in h2, h1)
     h2 = [matching[i] for i in h1]
-#    h3 = [lambda x: matching[x], h1 ]
-#    for i in h1:
-#            h3.append(matching[i])
+    pprint([h1, h2])
     return [h1, h2]
             
 if __name__ == "__main__":
@@ -240,29 +238,38 @@ if __name__ == "__main__":
             if third != []:
                 fourth.append(copy(third))
                 third = []
-    pprint(fourth)
+#    pprint(fourth)
     array1 = []
     array2 = []
-    temp_dict = {}
+    temp_dict1 = {}
+    temp_dict2 = {}
 
     for i in fourth:
         for j in i:
             array1.append(j[2])
             array2.append(j[3])
-            temp_dict[j[2]]=j[3]
+            temp_dict1[j[2]]=j[3]
     
-    array3 = Complain(t1, t2, array1, array2, temp_dict)
-    temp_dict.clear()
-    pprint(array3)
+    array3 = Complain(t1, t2, array1, array2, temp_dict1)
+
     for i in array3[0]:
-        temp_dict[get_number_of_children(i)] = i
+        temp_dict2[get_number_of_children(i)] = i
         
-    for key in sorted(temp_dict.keys()):
-        str = translate_to_c(temp_dict[key])
-        h = str.splitlines()
-        for i in h:
-            if i != '' and i != ' ':
-                print("0> {0}".format(i))
+    for key in sorted(temp_dict2.keys(), key=lambda x:-x):
+        print_file(temp_dict2[key], 0)
+        print_file(temp_dict1[temp_dict2[key]], 1)
         print('')
+#        str1 = translate_to_c(temp_dict2[key])
+#        str2 = translate_to_c(temp_dict1[temp_dict2[key]])
+#        h1 = str1.splitlines()
+#        h2 = str2.splitlines()
+#        for i in h1:
+#            if i != '' and i != ' ':
+#                print("0> {0}".format(i))
+#        for i in h2:
+#            if i != '' and i != ' ':
+#                print("1> {0}".format(i))
+#        print('')
+
 #    pprint(arr_arr)
-    pprint(varr_arr)
+#    pprint(varr_arr)
