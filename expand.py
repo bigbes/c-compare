@@ -6,9 +6,8 @@ def expand_decl(decl, type_arr):
     if typ == TypeDecl:
         return expand_decl(decl.type, type_arr)
     elif typ == IdentifierType:
-#        return decl.names
-        if decl.names[0] in type_arr:        #???
-            return type_arr[decl.names[0]][1]#???
+        if decl.names[0] in type_arr:        
+            return type_arr[decl.names[0]][1]
         else:
             return decl.names
     elif typ == ID:

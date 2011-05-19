@@ -195,8 +195,8 @@ if __name__ == "__main__":
         filename1  = sys.argv[1]
         filename2  = sys.argv[2]
     else:
-        filename1 = 'main1.c'
-        filename2 = 'main2.c'
+        filename1 = 'examples/main1.c'
+        filename2 = 'examples/main2.c'
     makeinit()
     ans1 = {}
     ans2 = {}
