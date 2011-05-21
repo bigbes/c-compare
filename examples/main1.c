@@ -10,19 +10,19 @@ typedef struct {
 } _C;
 
 void bubblesort(int a[], int n){
-    int i, j, k;
-    for(i=0; i < n; ++i){
-        for (j = i+1; j<n; ++j)
-            if (a[i] < a[j])
-                k = a[i];
-                a[i] = a[j];
-                a[j] = k;
+    int k,b,c;
+    for(k=0; k < n; ++k){
+        for (b = k+1; b<n; ++b)
+            if (a[k] < a[b])
+                c = a[k];
+                a[k] = a[b];
+                a[b] = c;
     }
 }
 
 int main(){
-    int a[] = {9,8,7,6,5,4,3,2,1,0};
-    bubblesort(a, 10);
+    int zx[] = {9,8,7,6,5,4,3,2,1,0};
+    bubblesort(zx, 10);
     _C ololo;
     return 0;
 }

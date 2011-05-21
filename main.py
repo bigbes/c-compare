@@ -226,12 +226,16 @@ def AddParsingArguments():
                         ,  default='examples/main2.c')
     parser.add_argument('-o', '--output', help='output file'
                         ,  default=sys.stdout)
-    parser.add_argument('-n', '--number', help='max number of coincidences'
+    parser.add_argument('-n', '--number', help='max number of coincidences', type=int
                         , default=10)
 
     args = parser.parse_args()
-    if args.output != sys.stdout:
-        sys.stdout = open(args.output, 'a')
+    try:
+        if args.output != sys.stdout:
+            f = open(args.output, 'a')
+            sys.stdout = f
+    except IOError:
+        print('can\'t open file {0} for writing'.format(args.output))
     return (args.first, args.second, args.number)
 
 if __name__ == "__main__":
@@ -285,5 +289,3 @@ if __name__ == "__main__":
             print('#----------------------------------------')
             number -= 1
             fragment_number += 1
-
-    
