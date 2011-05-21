@@ -1,6 +1,6 @@
 from pycparser.c_ast import *
 
-def makeinit():
+def MakeInit():
     ID.__init__ = init_ID
     ID.attr_names = ('name', 'id')
     Decl.__init__ = init_Decl

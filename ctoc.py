@@ -388,9 +388,11 @@ def translate_to_c(ast):
 def print_file(node, number):#, output=sys.stdout()):
         str = translate_to_c(node)
         h = str.splitlines()
+        coord = node.coord.line
         for i in h:
             if i != '' and i != ' ':
-                print("{1}> {0}".format(i, number))
+                print("{1} - {2}> {0}".format(i, number, coord))
+                coord += 1
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
     pass
