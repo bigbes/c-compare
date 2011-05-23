@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 #-----------------------------------------------------------------
-# pycparser: ctoc.py
+# pycparser: c-to-c.py
 #
-# Example of a C code generator from pycparser AST nodes, serving
+# Example of a C code generator from pycparser AST nodes, serving 
 # as a simplistic translator from C to AST and back to C.
-# Note: at this stage, the example is "alpha release" and considered
+# Note: at this stage, the example is "alpha release" and considered 
 # experimental. Please file any bugs you find in the Issues page on pycparser's
 # website.
 #
@@ -23,34 +24,34 @@ from pycparser import c_parser, c_ast, parse_file
 
 class CGenerator(object):
     """ Uses the same visitor pattern as c_ast.NodeVisitor, but modified to
-        return a value from each visit method, using string accumulation in
+        return a value from each visit method, using string accumulation in 
         generic_visit.
     """
     def __init__(self):
         self.output = ''
-
+        
         # Statements start with indentation of self.indent_level spaces, using
         # the _make_indent method
         #
         self.indent_level = 0
-
+    
     def _make_indent(self):
         return ' ' * self.indent_level
-
+    
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
         return getattr(self, method, self.generic_visit)(node)
-
+    
     def generic_visit(self, node):
         #~ print('generic:', type(node))
         if node is None:
             return ''
         else:
             return ''.join(self.visit(c) for c in node.children())
-
+    
     def visit_Constant(self, n):
         return n.value
-
+        
     def visit_ID(self, n):
         return n.name
 
@@ -74,21 +75,21 @@ class CGenerator(object):
             return '%s%s' % (n.op, operand)
 
     def visit_BinaryOp(self, n):
-        lval_str = self._parenthesize_if(n.left,
+        lval_str = self._parenthesize_if(n.left, 
                             lambda d: not self._is_simple_node(d))
-        rval_str = self._parenthesize_if(n.right,
+        rval_str = self._parenthesize_if(n.right, 
                             lambda d: not self._is_simple_node(d))
         return '%s %s %s' % (lval_str, n.op, rval_str)
-
+    
     def visit_Assignment(self, n):
         rval_str = self._parenthesize_if(
-                            n.rvalue,
+                            n.rvalue, 
                             lambda n: isinstance(n, c_ast.Assignment))
         return '%s %s %s' % (self.visit(n.lvalue), n.op, rval_str)
-
+    
     def visit_IdentifierType(self, n):
         return ' '.join(n.names)
-
+    
     def visit_Decl(self, n, no_type=False):
         # no_type is used when a Decl is part of a DeclList, where the type is
         # explicitly only for the first delaration in a list.
@@ -101,27 +102,33 @@ class CGenerator(object):
             else:
                 s += ' = ' + self.visit(n.init)
         return s
-
+    
     def visit_DeclList(self, n):
         s = self.visit(n.decls[0])
         if len(n.decls) > 1:
-            s += ', ' + ', '.join(self.visit_Decl(decl, no_type=True)
+            s += ', ' + ', '.join(self.visit_Decl(decl, no_type=True) 
                                     for decl in n.decls[1:])
         return s
-
+    
     def visit_Typedef(self, n):
         s = ''
         if n.storage: s += ' '.join(n.storage) + ' '
         s += self._generate_type(n.type)
         return s
-
+    
     def visit_Cast(self, n):
-        s = '(' + self._generate_type(n.to_type) + ')'
+        s = '(' + self._generate_type(n.to_type) + ')' 
         return s + ' ' + self.visit(n.expr)
-
+    
     def visit_ExprList(self, n):
-        return ', '.join(self.visit(expr) for expr in n.exprs)
-
+        visited_subexprs = []
+        for expr in n.exprs:
+            if isinstance(expr, c_ast.ExprList):
+                visited_subexprs.append('{' + self.visit(expr) + '}')
+            else:
+                visited_subexprs.append(self.visit(expr))
+        return ', '.join(visited_subexprs)
+    
     def visit_Enum(self, n):
         s = 'enum'
         if n.name: s += ' ' + n.name
@@ -129,13 +136,13 @@ class CGenerator(object):
             s += ' {'
             for i, enumerator in enumerate(n.values.enumerators):
                 s += enumerator.name
-                if enumerator.value:
+                if enumerator.value: 
                     s += ' = ' + self.visit(enumerator.value)
-                if i != len(n.values.enumerators) - 1:
+                if i != len(n.values.enumerators) - 1: 
                     s += ', '
             s += '}'
         return s
-
+    
     def visit_Struct(self, n):
         s = 'struct'
         if n.name: s += ' ' + n.name
@@ -145,7 +152,7 @@ class CGenerator(object):
                 s += '  ' + self.visit(decl) + ';\n'
             s += '}'
         return s
-
+        
     def visit_FuncDef(self, n):
         decl = self.visit(n.decl)
         self.indent_level = 0
@@ -169,7 +176,7 @@ class CGenerator(object):
         self.indent_level -= 2
         s += self._make_indent() + '}\n'
         return s
-
+    
     def visit_ParamList(self, n):
         return ', '.join(self.visit(param) for param in n.params)
 
@@ -180,26 +187,26 @@ class CGenerator(object):
 
     def visit_Break(self, n):
         return 'break;'
-
+        
     def visit_Continue(self, n):
         return 'continue;'
-
+    
     def visit_TernaryOp(self, n):
         s = self.visit(n.cond) + ' ? '
         s += self.visit(n.iftrue) + ' : '
         s += self.visit(n.iffalse)
         return s
-
+    
     def visit_If(self, n):
         s = 'if ('
         if n.cond: s += self.visit(n.cond)
         s += ')\n'
         s += self._generate_stmt(n.iftrue, add_indent=True)
-        if n.iffalse:
+        if n.iffalse: 
             s += self._make_indent() + 'else\n'
             s += self._generate_stmt(n.iffalse, add_indent=True)
         return s
-
+    
     def visit_For(self, n):
         s = 'for ('
         if n.init: s += self.visit(n.init)
@@ -230,12 +237,12 @@ class CGenerator(object):
         s = 'switch (' + self.visit(n.cond) + ')\n'
         s += self._generate_stmt(n.stmt, add_indent=True)
         return s
-
+    
     def visit_Case(self, n):
         s = 'case ' + self.visit(n.expr) + ':\n'
         s += self._generate_stmt(n.stmt, add_indent=True)
         return s
-
+    
     def visit_Default(self, n):
         return 'default:\n' + self._generate_stmt(n.stmt, add_indent=True)
 
@@ -251,6 +258,9 @@ class CGenerator(object):
     def visit_Struct(self, n):
         return self._generate_struct_union(n, 'struct')
 
+    def visit_Typename(self, n):
+        return self._generate_type(n.type)
+        
     def visit_Union(self, n):
         return self._generate_struct_union(n, 'union')
 
@@ -265,13 +275,13 @@ class CGenerator(object):
         return s
 
     def _generate_struct_union(self, n, name):
-        """ Generates code for structs and unions. name should be either
+        """ Generates code for structs and unions. name should be either 
             'struct' or union.
         """
         s = name + ' ' + (n.name or '')
         if n.decls:
             s += '\n'
-            s += self._make_indent()
+            s += self._make_indent() 
             self.indent_level += 2
             s += '{\n'
             for decl in n.decls:
@@ -282,15 +292,15 @@ class CGenerator(object):
 
     def _generate_stmt(self, n, add_indent=False):
         """ Generation from a statement node. This method exists as a wrapper
-            for individual visit_* methods to handle different treatment of
+            for individual visit_* methods to handle different treatment of 
             some statements in this context.
         """
         typ = type(n)
         if add_indent: self.indent_level += 2
         indent = self._make_indent()
         if add_indent: self.indent_level -= 2
-
-        if typ in (
+        
+        if typ in ( 
                 c_ast.Decl, c_ast.Assignment, c_ast.Cast, c_ast.UnaryOp,
                 c_ast.BinaryOp, c_ast.TernaryOp, c_ast.FuncCall, c_ast.ArrayRef,
                 c_ast.StructRef):
@@ -299,8 +309,8 @@ class CGenerator(object):
             #
             return indent + self.visit(n) + ';\n'
         elif typ in (c_ast.Compound,):
-            # No extra indentation required before the opening brace of a
-            # compound - because it consists of multiple lines it has to
+            # No extra indentation required before the opening brace of a 
+            # compound - because it consists of multiple lines it has to 
             # compute its own indentation.
             #
             return self.visit(n)
@@ -315,21 +325,21 @@ class CGenerator(object):
         if n.storage: s += ' '.join(n.storage) + ' '
         s += self._generate_type(n.type)
         return s
-
+    
     def _generate_type(self, n, modifiers=[]):
-        """ Recursive generation from a type node. n is the type node.
-            modifiers collects the PtrDecl, ArrayDecl and FuncDecl modifiers
+        """ Recursive generation from a type node. n is the type node. 
+            modifiers collects the PtrDecl, ArrayDecl and FuncDecl modifiers 
             encountered on the way down to a TypeDecl, to allow proper
             generation from it.
         """
         typ = type(n)
         #~ print(n, modifiers)
-
+        
         if typ == c_ast.TypeDecl:
             s = ''
             if n.quals: s += ' '.join(n.quals) + ' '
             s += self.visit(n.type)
-
+            
             nstr = n.declname if n.declname else ''
             # Resolve modifiers.
             # Wrap in parens to distinguish pointer to array and pointer to
@@ -378,21 +388,20 @@ class CGenerator(object):
         """ Returns True for nodes that are "simple" - i.e. nodes that always
             have higher precedence than operators.
         """
-        return isinstance(n,(   c_ast.Constant, c_ast.ID, c_ast.ArrayRef,
+        return isinstance(n,(   c_ast.Constant, c_ast.ID, c_ast.ArrayRef, 
                                 c_ast.StructRef, c_ast.FuncCall))
 
 def translate_to_c(ast):
     generator = CGenerator()
     return generator.visit(ast)
 
-def print_file(node, number):#, output=sys.stdout()):
+def print_file(node, number):
         str = translate_to_c(node)
         h = str.splitlines()
-        coord = node.coord.line
+        print("Beggining from the line {0}".format(node.coord.line))
         for i in h:
             if i != '' and i != ' ':
-                print("{1} - {2}> {0}".format(i, number, coord))
-                coord += 1
+                print("{1}> {0}".format(i, number))
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
     pass

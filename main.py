@@ -1,4 +1,4 @@
-#/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 from pycparser import parse_file, c_parser
@@ -8,7 +8,7 @@ from pycparser.c_ast import *
 from copy import copy
 
 from ctoc import translate_to_c, print_file
-from genccfg import MakeInit
+from genccfg import MakeInit, assist
 from expand import expand_decl, expand_init
 
 class func_count:
@@ -22,12 +22,6 @@ varr_arr = {}
 fc_var = func_count()
 fc_func = func_count()
 fc_type = func_count()
-
-def assist(node):
-    typ = type(node)
-    if typ == BinaryOp or typ == UnaryOp:
-        return node.__class__.__name__+node.op
-    return node.__class__.__name__
 
 def timer(f):
     def tmp(*args, **kwargs):
@@ -147,7 +141,6 @@ def UncryptDecl(node, var_arr = None, type_arr = None,
            node.type.name != None:
             type_undone_arr[node.type.name]=[fc_type(),
                                              expand_decl(node, type_arr)[2]]
-#            pprint(type_undone_arr)
 
     elif typ == Typedef:
         if type(node.type) in [Struct, Union, Enum] and\
@@ -178,9 +171,10 @@ def UncryptDecl(node, var_arr = None, type_arr = None,
             if type(i) in [Decl, FuncDef, DeclList, Typedef]:
                 UncryptDecl(i, var_arr, type_arr, type_undone_arr, func_arr)
             else:
-                UncryptDecl(i, copy(var_arr), copy(type_arr), copy(type_undone_arr), copy(func_arr))
+                UncryptDecl(i, copy(var_arr), copy(type_arr),\
+                copy(type_undone_arr), copy(func_arr))
 
-#@timer
+@timer
 def parsing_file(filename, ans, debug=None):
     if debug == None:
         debug = False
@@ -200,7 +194,6 @@ def Complain1(node, array, answer = None):
     if answer is None:
         answer = []
     if node in array:
-#        pprint(node)
         answer.append(node)
         return answer
     else:
@@ -213,7 +206,6 @@ def Complain(node1, node2, array1, array2, matching):
     h2 = Complain1(node2, array2)
     filter(lambda x: matching[x] in h2, h1)
     h2 = [matching[i] for i in h1]
-#    pprint([h1, h2])
     return [h1, h2]
 
 def AddParsingArguments():
@@ -237,8 +229,9 @@ def AddParsingArguments():
     except IOError:
         print('can\'t open file {0} for writing'.format(args.output))
     return (args.first, args.second, args.number)
-
-if __name__ == "__main__":
+     
+     
+def main():
     filename1, filename2, number = AddParsingArguments()
     MakeInit()
     ans1 = {}
@@ -289,3 +282,6 @@ if __name__ == "__main__":
             print('#----------------------------------------')
             number -= 1
             fragment_number += 1
+    return 0
+if __name__ == "__main__":
+  main()

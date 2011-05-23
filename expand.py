@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pycparser.c_ast import *
 
 def expand_decl(decl, type_arr):

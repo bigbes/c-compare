@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pycparser.c_ast import *
 
 def MakeInit():
@@ -24,6 +25,12 @@ def init_Decl(self, name, quals, storage, funcspec, type, init, bitsize,\
     self.bitsize = bitsize
     self.coord = coord
     self.id = id
+
+def assist(node):
+    typ = type(node)
+    if typ == BinaryOp or typ == UnaryOp:
+        return node.__class__.__name__+node.op
+    return node.__class__.__name__
 
 #------------------------------------------------------------------------------
 
