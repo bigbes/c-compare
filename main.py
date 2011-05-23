@@ -6,6 +6,7 @@ import time,argparse,sys
 from pprint import pprint
 from pycparser.c_ast import *
 from copy import copy
+from functools import reduce
 
 from ctoc import translate_to_c, print_file
 from genccfg import MakeInit, assist
@@ -27,7 +28,7 @@ def timer(f):
     def tmp(*args, **kwargs):
         t = time.time()
         res = f(*args, **kwargs)
-        pprint("Execution Time: %f" % (time.time()-t))
+        print("Execution Time: %f" % (time.time()-t))
         return res
 
     return tmp
@@ -271,6 +272,10 @@ def main():
 
     for i in array3[0]:
         temp_dict2[get_number_of_children(i)] = i
+    
+    nodes = reduce(lambda x, y: x + y, temp_dict2.keys())
+    print("Сoefficient of Coincidens is  {0}".format((nodes*nodes*100)/(get_number_of_children(t1)*get_number_of_children(t2))))
+    
     fragment_number = 1
     for key in sorted(temp_dict2.keys(), key=lambda x:-x):
         if number > 0:
