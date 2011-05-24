@@ -398,7 +398,8 @@ def translate_to_c(ast):
 def print_file(node, number):
         str = translate_to_c(node)
         h = str.splitlines()
-        print("Beggining from the line {0}".format(node.coord.line))
+        if node.coord != None:
+          print("Beggining from the line {0}".format(node.coord.line))
         for i in h:
             if i != '' and i != ' ':
                 print("{1}> {0}".format(i, number))

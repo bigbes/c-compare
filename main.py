@@ -190,7 +190,11 @@ def parsing_file(filename, ans=None, debug=None):
       ans = {}
     if debug == None:
       debug = False
-    node = parse_file(filename)
+    try:
+      node = parse_file(filename)
+    except IOError:
+      print("There's no file {0}".format(filename), file=sys.stderr)
+      exit(1)
     hashes_func(node, ans)
     UncryptDecl(node)
     if debug:
@@ -226,13 +230,13 @@ def AddParsingArguments(debug = None):
     parser = argparse.ArgumentParser(description='Process input files,\
     output files and max number of coincidences')
 
-    parser.add_argument('-f', '--first', help='first input file'
+    parser.add_argument('-f', help='first input file'
                         , default='examples/main1.c')
-    parser.add_argument('-s', '--second', help='second input file'
+    parser.add_argument('-s', help='second input file'
                         ,  default='examples/main2.c')
-    parser.add_argument('-o', '--output', help='output file'
+    parser.add_argument('-o', help='output file'
                         ,  default=sys.stdout)
-    parser.add_argument('-n', '--number', help='max number of coincidences', type=int
+    parser.add_argument('-n', help='max number of coincidences', type=int
                         , default=10)
     parser.add_argument('--dt', help='debugging name table(only for first file)', action='store_const', const=True, default=False)
 
@@ -240,14 +244,14 @@ def AddParsingArguments(debug = None):
     if debug == True:
         print(args)
     try:
-        if args.output != sys.stdout:
-            buffer_out = open(args.output, 'a')
+        if args.o != sys.stdout:
+            buffer_out = open(args.o, 'w')
             sys.stdout = buffer_out
         else:
             buffer_out = sys.stdout
     except IOError:
-        print('can\'t open file {0} for writing'.format(args.output))
-    return (args.first, args.second, args.number, args.dt, buffer_out)
+        print('can\'t open file {0} for writing'.format(args.output), file=sys.stderr)
+    return (args.f, args.s, args.n, args.dt, buffer_out)
      
      
 def main(filename1, filename2, number):
@@ -257,20 +261,7 @@ def main(filename1, filename2, number):
     t2 = parsing_file(filename2, ans2)
     first = {}
     second = {}
-    third = []    
-    parsing_file(filename1)
-    print("First name table")
-    print('#----------------------------------------')
-    pprint(varr_arr)
-    print('')
-    varr_arr.clear()
-    fc_var.reset()
-    parsing_file(filename2)
-    print("First name table")
-    print('#----------------------------------------')
-    pprint(varr_arr)
-    print('')
-    exit(0)
+    third = []
     fourth = []
     for i in ans1:
         if i in ans2:
@@ -307,7 +298,7 @@ def main(filename1, filename2, number):
     
     fragment_number = 1
     for key in sorted(temp_dict2.keys(), key=lambda x:-x):
-        if number > 0:
+        if number > 0:#  or (type(key) != NoneType):
             print("Fragment Number: {0}".format(fragment_number))
             print('#----------------------------------------')
             print_file(temp_dict2[key], 0)
