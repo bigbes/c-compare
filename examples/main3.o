@@ -1,0 +1,47 @@
+Execution Time: 2.363216
+Execution Time: 2.402803
+Сoefficient of Coincidens is  49.0
+Fragment Number: 1
+#----------------------------------------
+Beggining from the line 0
+0> {
+0>   if (i == 50)
+0>     return i;
+0> }
+
+Beggining from the line 0
+1> {
+1>   if (i == 50)
+1>     return i;
+1> }
+#----------------------------------------
+Fragment Number: 2
+#----------------------------------------
+0> int i = 0
+
+1> int j = 0
+#----------------------------------------
+Fragment Number: 3
+#----------------------------------------
+Beggining from the line 1
+0> int main()
+
+Beggining from the line 1
+1> int main()
+#----------------------------------------
+Fragment Number: 4
+#----------------------------------------
+Beggining from the line 2
+0> i < 100
+
+Beggining from the line 3
+1> j < 100
+#----------------------------------------
+Fragment Number: 5
+#----------------------------------------
+Beggining from the line 2
+0> ++i
+
+Beggining from the line 3
+1> ++j
+#----------------------------------------
