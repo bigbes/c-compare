@@ -14,12 +14,18 @@ from expand import expand_decl, expand_init
 
 class func_count:
     """Функтор-счетчик"""
-    count = 0
+    def __init__(self):
+      self.count = 0
+      
+    def reset(self):
+      self.count = 0
+    
     def __call__(self):
-        self.count += 1
-        return self.count
+      self.count += 1
+      return self.count
 
 varr_arr = {}
+varr_asign = {}
 fc_var = func_count()
 fc_func = func_count()
 fc_type = func_count()
@@ -132,9 +138,12 @@ def UncryptDecl(node, var_arr = None, type_arr = None,
             node.id=fc_var()
             var_arr[node.name]=[node.id, expand_decl(node, type_arr)]
             if node.id not in varr_arr.keys():
-                varr_arr[node.id] = [expand_decl(node, type_arr)]
+                varr_arr[node.id] = expand_decl(node, type_arr)
+                varr_asign[node.id] = [node.name, expand_decl(node, type_arr)]
             else:
-                varr_arr[node.id] += [expand_decl(node, type_arr)]
+              raise(Exception("Strange unhendled exception on str144"))
+#            else:
+#                varr_arr[node.id] += [expand_decl(node, type_arr)]
         if node.init != None:
             UncryptDecl(node.init, var_arr, type_arr,
                         type_undone_arr, func_arr)
@@ -176,9 +185,11 @@ def UncryptDecl(node, var_arr = None, type_arr = None,
                 copy(type_undone_arr), copy(func_arr))
 
 @timer
-def parsing_file(filename, ans, debug=None):
+def parsing_file(filename, ans=None, debug=None):
+    if ans == None:
+      ans = {}
     if debug == None:
-        debug = False
+      debug = False
     node = parse_file(filename)
     hashes_func(node, ans)
     UncryptDecl(node)
@@ -209,7 +220,9 @@ def Complain(node1, node2, array1, array2, matching):
     h2 = [matching[i] for i in h1]
     return [h1, h2]
 
-def AddParsingArguments():
+def AddParsingArguments(debug = None):
+    if debug == None:
+      debug = False
     parser = argparse.ArgumentParser(description='Process input files,\
     output files and max number of coincidences')
 
@@ -221,27 +234,43 @@ def AddParsingArguments():
                         ,  default=sys.stdout)
     parser.add_argument('-n', '--number', help='max number of coincidences', type=int
                         , default=10)
+    parser.add_argument('--dt', help='debugging name table(only for first file)', action='store_const', const=True, default=False)
 
     args = parser.parse_args()
+    if debug == True:
+        print(args)
     try:
         if args.output != sys.stdout:
-            f = open(args.output, 'a')
-            sys.stdout = f
+            buffer_out = open(args.output, 'a')
+            sys.stdout = buffer_out
+        else:
+            buffer_out = sys.stdout
     except IOError:
         print('can\'t open file {0} for writing'.format(args.output))
-    return (args.first, args.second, args.number)
+    return (args.first, args.second, args.number, args.dt, buffer_out)
      
      
-def main():
-    filename1, filename2, number = AddParsingArguments()
-    MakeInit()
+def main(filename1, filename2, number):
     ans1 = {}
     ans2 = {}
     t1 = parsing_file(filename1, ans1)
     t2 = parsing_file(filename2, ans2)
     first = {}
     second = {}
-    third = []
+    third = []    
+    parsing_file(filename1)
+    print("First name table")
+    print('#----------------------------------------')
+    pprint(varr_arr)
+    print('')
+    varr_arr.clear()
+    fc_var.reset()
+    parsing_file(filename2)
+    print("First name table")
+    print('#----------------------------------------')
+    pprint(varr_arr)
+    print('')
+    exit(0)
     fourth = []
     for i in ans1:
         if i in ans2:
@@ -288,5 +317,19 @@ def main():
             number -= 1
             fragment_number += 1
     return 0
+
+def debug_table(filename1, buffer_out):
+  t = parsing_file(filename1)
+  print("First name table")
+  print('#----------------------------------------')
+  pprint(varr_asign)
+  print('#----------------------------------------')
+  t.show(buf=buffer_out)
+  return 0
+
 if __name__ == "__main__":
-  main()
+  filename1, filename2, number, dt, buffer_out = AddParsingArguments()
+  MakeInit()
+  if dt == True:
+    exit(debug_table(filename1, buffer_out))
+  exit(main(filename1, filename2, number))

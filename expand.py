@@ -15,7 +15,7 @@ def expand_decl(decl, type_arr):
         return decl.name
     elif typ in [Struct, Union]:
         decls = [expand_decl(d, type_arr) for d in decl.decls or []]
-        return [typ.__name__, decl.name, decls]
+        return [typ.__name__, decls]
     elif typ == Enum:
         if decl.values != None:
             return ['Enum', len(decl.values.enumerators)]

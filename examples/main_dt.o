@@ -1,0 +1,37 @@
+Execution Time: 2.414848
+First name table
+#----------------------------------------
+{1: ['i', ['double']], 2: ['b', ['double']], 3: ['i', ['int']]}
+#----------------------------------------
+FileAST: 
+  FuncDef: 
+    Decl: main, [], [], [], 1
+      FuncDecl: 
+        TypeDecl: main, []
+          IdentifierType: ['int']
+    Compound: 
+      Decl: i, [], [], [], 1
+        TypeDecl: i, []
+          IdentifierType: ['double']
+        Constant: int, 0
+      Decl: b, [], [], [], 2
+        TypeDecl: b, []
+          IdentifierType: ['double']
+        Constant: int, 1
+      For: 
+        DeclList: 
+          Decl: i, [], [], [], 3
+            TypeDecl: i, []
+              IdentifierType: ['int']
+            Constant: int, 1
+        BinaryOp: <
+          ID: i, 3
+          Constant: int, 100
+        UnaryOp: ++
+          ID: i, 3
+        Compound: 
+          UnaryOp: p++
+            ID: i, 3
+          Assignment: =
+            ID: b, 2
+            Constant: int, 3
